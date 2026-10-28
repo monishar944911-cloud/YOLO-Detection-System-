@@ -1,0 +1,111 @@
+:root {
+  --lblue  :  #65AEC7;
+  --beige  : #dbc6c0;
+  --bluepurple : #78809d;
+  --greenblue : #2C6A74;
+  --graygreen : #6b8784;
+}
+
+
+
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--bluepurple);
+    align-items: center;
+  }
+  .bg{
+      background: url('/static/background.png') repeat-y ;
+      background-size:cover;
+      background-position: center top;
+      min-height: 100vh;
+  }
+  
+  
+  
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    max-width: 800px;
+  }
+  
+  p {
+    font-size: 100%;
+    opacity: 0.5;
+    color: black;
+  }
+  .container {
+    display: flex;
+    gap: 50px;  
+    margin: 0;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    height : 100%;
+    margin-top: 5%;
+  }
+  
+  .box {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    width: 500px;
+    height: 300px;
+    display: flex;
+    justify-content:space-evenly;
+    align-items: center;
+    font-size: 1.2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    background-color: var(--graygreen);
+    
+  }
+  .top-banner {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    background-color:#1a2e3e;
+    color: silver;
+    font-size: 1.4rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }  
+  
+
+.box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit:fill;
+    display: block;
+    margin: 0 auto;
+}
+
+button ,input{
+  align-self: center;
+}
+.graph{
+  max-width: 95%;
+  max-height: 95%;
+  margin: 20px;
+}
+.image-container {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    align-items: center; /* Align items vertically */
+    gap: 20px; /* Space between images */
+}
+
+
+.exp{
+  font:175% bold;
+  opacity: 1;
+  color: var(--greenblue);
+}

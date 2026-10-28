@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+
+
+{% block content1 %}
+
+<h2>Original Image</h2>
+
+<img src="{{ file }}"
+     alt="Original Image"
+     style="
+        max-width:100%;
+        max-height:500px;
+        border-radius:12px;
+    ">
+
+{% endblock %}
+
+
+{% block content2 %}
+
+<h2>Detection Result</h2>
+
+<img src="{{ result }}"
+     alt="YOLO Detection Result"
+     style="
+        max-width:100%;
+        max-height:500px;
+        border-radius:12px;
+    ">
+
+
+<!-- ============================= -->
+<!-- DETECTION SUMMARY -->
+<!-- ============================= -->
+
+<div style="
+    margin-top:25px;
+    padding:20px;
+    background:#f5f5f5;
+    border-radius:12px;
+">
+
+    <h2>🔍 Detection Summary</h2>
+
+
+    {% if detected_objects %}
+
+    {% for object_name, count in detected_objects.items() %}
+
+    <p style="font-size:18px;">
+        <strong>
+            {{ object_name | title }}
+        </strong>
+
+        :
+        {{ count }}
+    </p>
+
+    {% endfor %}
+
+
+    <hr>
+
+
+    <h3>
+        Total Objects:
+        {{ detected_objects.values() | sum }}
+    </h3>
+
+
+    <h3>
+        Average Confidence:
+        {{ average_confidence }}%
+    </h3>
+
+
+    {% else %}
+
+    <p>
+        No objects detected.
+    </p>
+
+    {% endif %}
+
+</div>
+
+
+{% endblock %}
+
+
+{% block clear %}
+
+<div style="
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+">
+
+
+    <!-- HOME -->
+
+    <a href="/"
+       style="
+            padding:12px 20px;
+            background:#172f40;
+            color:white;
+            text-decoration:none;
+            border-radius:7px;
+        ">
+        🏠 Home
+    </a>
+
+
+    <!-- DOWNLOAD -->
+
+    <a href="{{ url_for('download_result', filename=filename) }}"
+       style="
+            padding:12px 20px;
+            background:#198754;
+            color:white;
+            text-decoration:none;
+            border-radius:7px;
+        ">
+        ⬇️ Download Result
+    </a>
+
+
+    <!-- NEW IMAGE -->
+
+    <a href="/"
+       style="
+            padding:12px 20px;
+            background:#0d6efd;
+            color:white;
+            text-decoration:none;
+            border-radius:7px;
+        ">
+        🔄 Detect Another Image
+    </a>
+
+</div>
+
+{% endblock %}

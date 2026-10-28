@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>DAWNVision</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef3f6;
+        }
+
+
+        nav {
+            background: #172f40;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+
+            nav a {
+                color: white;
+                text-decoration: none;
+                font-size: 18px;
+            }
+
+
+            nav h1 {
+                margin: 0;
+            }
+
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+        }
+
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            background: #172f40;
+            color: white;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+
+        @media(max-width:800px) {
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <nav>
+
+        <a href="/">
+            🏠 Home
+        </a>
+
+
+        <h1>
+            DAWNVision
+        </h1>
+
+
+        <a href="/metrics">
+            📊 Metrics
+        </a>
+
+    </nav>
+
+
+    <div class="container">
+
+        <div class="grid">
+
+
+            <div class="card">
+
+                {% block content1 %}
+                {% endblock %}
+
+            </div>
+
+
+            <div class="card">
+
+                {% block content2 %}
+                {% endblock %}
+
+            </div>
+
+
+        </div>
+
+
+        <div style="
+            text-align:center;
+            margin-top:30px;
+        ">
+
+            {% block clear %}
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>

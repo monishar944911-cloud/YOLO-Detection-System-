@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>DAWNVision - AI Detection Dashboard</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #eef3f6;
+            color: #17202a;
+        }
+
+        header {
+            background: #173246;
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 94%;
+            max-width: 1500px;
+            margin: 25px auto;
+        }
+
+        .status {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 12px #0002;
+        }
+
+            .status h2 {
+                margin-top: 0;
+            }
+
+        .running {
+            color: #1769aa;
+            font-weight: bold;
+        }
+
+        .complete {
+            color: green;
+            font-weight: bold;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            min-width: 200px;
+            flex: 1;
+            box-shadow: 0 3px 12px #0002;
+        }
+
+            .card strong {
+                display: block;
+                font-size: 25px;
+                margin-top: 8px;
+            }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0002;
+        }
+
+            .panel h2 {
+                margin-top: 0;
+            }
+
+        /* CAMERA */
+
+        .camera-box {
+            background: #111;
+            border-radius: 10px;
+            overflow: hidden;
+            width: 100%;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #camera {
+            width: 100%;
+            max-height: 500px;
+            display: block;
+            object-fit: contain;
+            background: #111;
+        }
+
+        #resultCanvas {
+            display: none;
+        }
+
+        #captureCanvas {
+            display: none;
+        }
+
+        .camera-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            border: none;
+            padding: 12px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        #startCamera {
+            background: #1769aa;
+            color: white;
+        }
+
+            #startCamera:hover {
+                background: #0d4f82;
+            }
+
+        #stopCamera {
+            background: #d32f2f;
+            color: white;
+        }
+
+            #stopCamera:hover {
+                background: #a92121;
+            }
+
+        #snapshotButton {
+            background: #388e3c;
+            color: white;
+        }
+
+            #snapshotButton:hover {
+                background: #27652a;
+            }
+
+        #runDawnButton {
+            background: #6a1b9a;
+            color: white;
+        }
+
+            #runDawnButton:hover {
+                background: #4a126d;
+            }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .camera-status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 7px;
+            background: #eef3f6;
+            font-weight: bold;
+        }
+
+        .camera-result {
+            margin-top: 20px;
+        }
+
+            .camera-result img {
+                width: 100%;
+                border-radius: 10px;
+                display: none;
+            }
+
+        .camera-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .camera-stat {
+            background: #eef3f6;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+            .camera-stat strong {
+                display: block;
+                font-size: 22px;
+                margin-top: 5px;
+            }
+
+        .object-list {
+            margin-top: 15px;
+        }
+
+        .object {
+            margin-top: 8px;
+            padding: 10px;
+            background: #eef3f6;
+            border-radius: 6px;
+        }
+
+        .dataset-section {
+            margin-top: 25px;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat( auto-fit, minmax(300px, 1fr) );
+            gap: 20px;
+        }
+
+        .result {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0002;
+        }
+
+            .result img {
+                width: 100%;
+                border-radius: 8px;
+            }
+
+            .result p {
+                margin: 8px 0;
+            }
+
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 3px solid #ddd;
+            border-top: 3px solid #1769aa;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 7px;
+        }
+
+        @keyframes spin {
+
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .model-classes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .class-tag {
+            background: #eef3f6;
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 900px) {
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .camera-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <header>
+
+        🌫️ DAWNVision
+
+    </header>
+
+
+    <div class="container">
+
+
+        <!-- =====================================================
+             DAWN STATUS
+        ====================================================== -->
+
+        <div class="status">
+
+            <h2>
+                🤖 Automatic DAWN Dataset Detection
+            </h2>
+
+            <p>
+                DAWNVision automatically processes the
+                images stored in the DAWN dataset.
+            </p>
+
+            <p>
+                📁 Dataset:
+                <strong>dawn/images/</strong>
+            </p>
+
+            <p>
+                🧠 Model:
+                <strong id="modelName">
+                    {{ model_name }}
+                </strong>
+            </p>
+
+            <p id="datasetStatus"
+               class="running">
+
+                <span class="loader"></span>
+                Preparing DAWN dataset detection...
+
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             STATS
+        ====================================================== -->
+
+        <div class="stats">
+
+
+            <div class="card">
+
+                DAWN Images Processed
+
+                <strong id="imagesProcessed">
+                    {{ data.images_processed or 0 }}
+                </strong>
+
+            </div>
+
+
+            <div class="card">
+
+                Total DAWN Images
+
+                <strong id="totalImages">
+                    {{ data.total_images or 0 }}
+                </strong>
+
+            </div>
+
+
+            <div class="card">
+
+                Total Objects
+
+                <strong id="totalObjects">
+                    {{ data.total_objects or 0 }}
+                </strong>
+
+            </div>
+
+
+            <div class="card">
+
+                Model Status
+
+                <strong id="modelStatus">
+
+                    {% if model_loaded %}
+                    ✅ Ready
+                    {% else %}
+                    ⏳ Loading
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =====================================================
+             MODEL ERROR
+        ====================================================== -->
+        {% if model_error %}
+
+        <div class="status error">
+
+            ❌ Model Error:
+
+            {{ model_error }}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- =====================================================
+             MAIN DASHBOARD
+        ====================================================== -->
+
+        <div class="dashboard">
+
+
+            <!-- =================================================
+                 LIVE CAMERA
+            ================================================== -->
+
+            <div class="panel">
+
+
+                <h2>
+                    📷 Live AI Camera
+                </h2>
+
+
+                <p>
+                    Real-time DAWN YOLO object detection.
+                </p>
+
+
+                <div class="camera-box">
+
+
+                    <video id="camera"
+                           autoplay
+                           playsinline>
+                    </video>
+
+
+                    <canvas id="resultCanvas">
+                    </canvas>
+
+
+                </div>
+
+
+                <!-- Hidden capture canvas -->
+
+                <canvas id="captureCanvas">
+                </canvas>
+
+
+                <!-- CAMERA BUTTONS -->
+
+                <div class="camera-buttons">
+
+
+                    <button id="startCamera">
+
+                        ▶ Start Camera
+
+                    </button>
+
+
+                    <button id="stopCamera"
+                            disabled>
+
+                        ⏹ Stop Camera
+
+                    </button>
+
+
+                    <button id="snapshotButton"
+                            disabled>
+
+                        📸 Save Snapshot
+
+                    </button>
+
+
+                </div>
+
+
+                <!-- CAMERA STATUS -->
+
+                <div id="cameraStatus"
+                     class="camera-status">
+
+                    ⚪ Camera stopped
+
+                </div>
+
+
+                <!-- CAMERA STATS -->
+
+                <div class="camera-stats">
+
+
+                    <div class="camera-stat">
+
+                        Objects
+
+                        <strong id="liveObjects">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="camera-stat">
+
+                        Confidence
+
+                        <strong id="liveConfidence">
+                            0%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="camera-stat">
+
+                        Last Detection
+
+                        <strong id="liveTime">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- LIVE OBJECTS -->
+
+                <div class="object-list">
+
+
+                    <h3>
+                        🔍 Detected Objects
+                    </h3>
+
+
+                    <div id="liveObjectList">
+
+
+                        <div class="object">
+
+                            No objects detected yet.
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- RESULT -->
+
+                <div class="camera-result">
+
+
+                    <h3>
+                        🎯 AI Detection Result
+                    </h3>
+
+
+                    <img id="liveResultImage"
+                         alt="Live YOLO Detection Result">
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 DAWN INFORMATION
+            ================================================== -->
+
+            <div class="panel">
+
+
+                <h2>
+                    📊 DAWN Dataset Summary
+                </h2>
+
+
+                <p>
+                    The DAWN images are automatically
+                    processed in the background.
+                </p>
+
+
+                <div class="status">
+
+
+                    <strong>
+                        Dataset Location
+                    </strong>
+
+
+                    <p>
+                        📁 dawn/images/
+                    </p>
+
+
+                </div>
+
+
+                <div class="status">
+
+
+                    <strong>
+                        YOLO Model
+                    </strong>
+
+
+                    <p id="datasetModel">
+                        {{ model_name }}
+                    </p>
+
+
+                </div>
+
+
+                <div class="status">
+
+
+                    <strong>
+                        Detection Mode
+                    </strong>
+
+
+                    <p>
+                        🤖 Automatic DAWN Dataset Detection
+                    </p>
+
+
+                    <p>
+                        📷 Real-Time Camera Detection
+                    </p>
+
+
+                    <p>
+                        ⚡ Both run simultaneously
+                    </p>
+
+
+                </div>
+
+
+                <div class="status">
+
+
+                    <strong>
+                        System Status
+                    </strong>
+
+
+                    <p id="systemStatus">
+
+                        {% if model_loaded %}
+
+                        🟢 YOLO model ready
+
+                        {% else %}
+
+                        🟡 Loading YOLO model...
+
+                        {% endif %}
+
+                    </p>
+
+
+                </div>
+
+
+                <!-- RUN DAWN AGAIN -->
+
+                <button id="runDawnButton"
+                        style="width:100%; margin-top:5px;">
+
+                    🔄 Run DAWN Detection Again
+
+                </button>
+
+
+                <!-- MODEL CLASSES -->
+
+                <div class="status"
+                     style="margin-top:20px;">
+
+                    <strong>
+                        🧠 Model Classes
+                    </strong>
+
+
+                    <div id="modelClasses"
+                         class="model-classes">
+
+                        Loading...
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =====================================================
+             DAWN RESULTS
+        ====================================================== -->
+
+        <div class="dataset-section">
+
+
+            <h2>
+                🔍 DAWN Dataset Detection Results
+            </h2>
+
+
+            <div id="results"
+                 class="results">
+
+
+                {% if data.results %}
+
+
+                {% for item in data.results %}
+
+
+                <div class="result">
+
+
+                    <h3>
+                        {{ item.image }}
+                    </h3>
+
+
+                    {% if item.result_image %}
+
+                    <img src="{{ item.result_image }}"
+                         alt="DAWN Detection Result">
+
+                    {% endif %}
+
+
+                    <p>
+
+                        <strong>
+                            Objects Detected:
+                        </strong>
+
+                        {{ item.total_objects or 0 }}
+
+                    </p>
+
+
+                    <p>
+
+                        <strong>
+                            Average Confidence:
+                        </strong>
+
+                        {{ item.confidence or 0 }}%
+
+                    </p>
+
+
+                    {% if item.objects %}
+
+
+                    {% for name, count
+                    in item.objects.items() %}
+
+
+                    <div class="object">
+
+                        <strong>
+                            {{ name }}
+                        </strong>
+
+                        :
+                        {{ count }}
+
+                    </div>
+
+
+                    {% endfor %}
+
+
+                    {% endif %}
+
+
+                    {% if item.error %}
+
+                    <p class="error">
+
+                        ❌ {{ item.error }}
+
+                    </p>
+
+                    {% endif %}
+
+
+                </div>
+
+
+                {% endfor %}
+
+
+                {% else %}
+
+
+                <div class="status">
+
+                    <span class="loader"></span>
+
+                    Waiting for DAWN detection results...
+
+                </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    <script>
+
+
+/* =========================================================
+           CAMERA VARIABLES
+========================================================= */
+
+let cameraStream = null;
+
+let cameraRunning = false;
+
+let detectionBusy = false;
+
+let detectionTimer = null;
+
+let dawnRefreshTimer = null;
+
+
+/* =========================================================
+           HTML ELEMENTS
+========================================================= */
+
+const video =
+            document.getElementById("camera");
+
+const captureCanvas =
+            document.getElementById("captureCanvas");
+
+const resultCanvas =
+            document.getElementById("resultCanvas");
+
+const startButton =
+            document.getElementById("startCamera");
+
+const stopButton =
+            document.getElementById("stopCamera");
+
+const snapshotButton =
+            document.getElementById("snapshotButton");
+
+const runDawnButton =
+            document.getElementById("runDawnButton");
+
+const cameraStatus =
+            document.getElementById("cameraStatus");
+
+const liveObjects =
+            document.getElementById("liveObjects");
+
+const liveConfidence =
+            document.getElementById("liveConfidence");
+
+const liveTime =
+            document.getElementById("liveTime");
+
+const liveObjectList =
+            document.getElementById("liveObjectList");
+
+const liveResultImage =
+            document.getElementById("liveResultImage");
+
+
+/* =========================================================
+           START CAMERA
+========================================================= */
+
+startButton.addEventListener(
+            "click",
+            startCamera
+);
+
+
+async function startCamera() {
+
+
+            try {
+
+
+                if (
+                    !navigator.mediaDevices ||
+                    !navigator.mediaDevices.getUserMedia
+                ) {
+
+                    throw new Error(
+                        "Camera access is not supported by this browser."
+                    );
+
+                }
+
+
+                cameraStatus.textContent =
+                    "🟡 Requesting camera permission...";
+
+
+                cameraStatus.style.color =
+                    "#b26a00";
+
+
+                cameraStream =
+                    await navigator.mediaDevices.getUserMedia({
+
+                        video: {
+
+                            width: {
+                                ideal: 640
+                            },
+
+                            height: {
+                                ideal: 480
+                            },
+
+                            facingMode: "user"
+
+                        },
+
+                        audio: false
+
+                    });
+
+
+                video.srcObject =
+                    cameraStream;
+
+
+                await video.play();
+
+
+                cameraRunning = true;
+
+
+                startButton.disabled = true;
+
+                stopButton.disabled = false;
+
+                snapshotButton.disabled = false;
+
+
+                cameraStatus.textContent =
+                    "🟢 Camera running - AI detection active";
+
+
+                cameraStatus.style.color =
+                    "green";
+
+
+                startDetectionLoop();
+
+
+            }
+
+            catch (error) {
+
+
+                console.error(
+                    "Camera Error:",
+                    error
+                );
+
+
+                cameraStatus.textContent =
+                    "❌ Camera could not be started: "
+                    +
+                    error.message;
+
+
+                cameraStatus.style.color =
+                    "red";
+
+
+            }
+
+}
+
+
+/* =========================================================
+           START DETECTION LOOP
+========================================================= */
+
+function startDetectionLoop() {
+
+
+            if (detectionTimer) {
+
+                clearTimeout(
+                    detectionTimer
+                );
+
+            }
+
+
+            runLiveDetection();
+
+}
+
+
+/* =========================================================
+           LIVE DETECTION
+========================================================= */
+
+async function runLiveDetection() {
+
+
+            if (!cameraRunning) {
+
+                return;
+
+            }
+
+
+            if (detectionBusy) {
+
+                scheduleNextDetection();
+
+                return;
+
+            }
+
+
+            if (
+                video.readyState <
+                HTMLMediaElement.HAVE_CURRENT_DATA
+            ) {
+
+                scheduleNextDetection();
+
+                return;
+
+            }
+
+
+            if (
+                video.videoWidth === 0 ||
+                video.videoHeight === 0
+            ) {
+
+                scheduleNextDetection();
+
+                return;
+
+            }
+
+
+            detectionBusy = true;
+
+
+            try {
+
+
+                const width = 480;
+
+
+                const height =
+                    Math.round(
+
+                        video.videoHeight /
+                        video.videoWidth *
+                        width
+
+                    );
+
+
+                captureCanvas.width =
+                    width;
+
+
+                captureCanvas.height =
+                    height;
+
+
+                const context =
+                    captureCanvas.getContext(
+                        "2d"
+                    );
+
+
+                context.drawImage(
+
+                    video,
+
+                    0,
+                    0,
+
+                    width,
+                    height
+
+                );
+
+
+                const imageData =
+                    captureCanvas.toDataURL(
+
+                        "image/jpeg",
+
+                        0.60
+
+                    );
+
+
+                const response =
+                    await fetch(
+
+                        "/api/live_detect",
+
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    image:
+                                        imageData
+
+                                })
+
+                        }
+
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+
+                        data.error ||
+                        "Detection failed"
+
+                    );
+
+                }
+
+
+                /* ==============================================
+                   UPDATE STATS
+                ============================================== */
+
+                liveObjects.textContent =
+                    data.total_objects || 0;
+
+
+                liveConfidence.textContent =
+                    (data.confidence || 0)
+                    + "%";
+
+
+                liveTime.textContent =
+                    data.time || "--";
+
+
+                /* ==============================================
+                   OBJECT LIST
+                ============================================== */
+
+                displayLiveObjects(
+                    data.objects || {}
+                );
+
+
+                /* ==============================================
+                   RESULT IMAGE
+                ============================================== */
+
+                if (data.image) {
+
+                    liveResultImage.src =
+                        data.image;
+
+
+                    liveResultImage.style.display =
+                        "block";
+
+                }
+
+
+                cameraStatus.textContent =
+                    "🟢 Camera running - Detection successful";
+
+
+                cameraStatus.style.color =
+                    "green";
+
+
+            }
+
+            catch (error) {
+
+
+                console.error(
+                    "Live Detection Error:",
+                    error
+                );
+
+
+                if (cameraRunning) {
+
+                    cameraStatus.textContent =
+                        "⚠️ Camera running - "
+                        +
+                        error.message;
+
+                    cameraStatus.style.color =
+                        "#b26a00";
+
+                }
+
+            }
+
+            finally {
+
+
+                detectionBusy = false;
+
+
+                scheduleNextDetection();
+
+
+            }
+
+}
+
+
+/* =========================================================
+           NEXT CAMERA DETECTION
+========================================================= */
+
+function scheduleNextDetection() {
+
+
+            if (!cameraRunning) {
+
+                return;
+
+            }
+
+
+            detectionTimer =
+                setTimeout(
+
+                    runLiveDetection,
+
+                    350
+
+                );
+
+}
+
+
+/* =========================================================
+           DISPLAY LIVE OBJECTS
+========================================================= */
+
+function displayLiveObjects(
+            objects
+) {
+
+
+            liveObjectList.innerHTML =
+                "";
+
+
+            const entries =
+                Object.entries(
+                    objects
+                );
+
+
+            if (!entries.length) {
+
+
+                liveObjectList.innerHTML =
+
+                    `<div class="object">
+                        No objects detected.
+                    </div>`;
+
+
+                return;
+
+            }
+
+
+            entries.forEach(
+                ([name, count]) => {
+
+
+                    const div =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    div.className =
+                        "object";
+
+
+                    div.innerHTML =
+
+                        `<strong>
+                            ${escapeHTML(name)}
+                        </strong>
+                        : ${count}`;
+
+
+                    liveObjectList.appendChild(
+                        div
+                    );
+
+
+                }
+            );
+
+}
+
+
+/* =========================================================
+           STOP CAMERA
+========================================================= */
+
+stopButton.addEventListener(
+            "click",
+            stopCamera
+);
+
+
+function stopCamera() {
+
+
+            cameraRunning = false;
+
+
+            detectionBusy = false;
+
+
+            if (detectionTimer) {
+
+                clearTimeout(
+                    detectionTimer
+                );
+
+                detectionTimer = null;
+
+            }
+
+
+            if (cameraStream) {
+
+
+                cameraStream
+                    .getTracks()
+                    .forEach(
+                        track => track.stop()
+                    );
+
+
+                cameraStream = null;
+
+            }
+
+
+            video.srcObject = null;
+
+
+            startButton.disabled = false;
+
+            stopButton.disabled = true;
+
+            snapshotButton.disabled = true;
+
+
+            cameraStatus.textContent =
+                "⚪ Camera stopped";
+
+
+            cameraStatus.style.color =
+                "#333";
+
+}
+
+
+/* =========================================================
+           SNAPSHOT
+========================================================= */
+
+snapshotButton.addEventListener(
+            "click",
+            saveSnapshot
+);
+
+
+function saveSnapshot() {
+
+
+            if (
+                !liveResultImage.src ||
+                liveResultImage.style.display === "none"
+            ) {
+
+
+                alert(
+                    "No detection result available yet."
+                );
+
+
+                return;
+
+            }
+
+
+            const link =
+                document.createElement(
+                    "a"
+                );
+
+
+            link.href =
+                liveResultImage.src;
+
+
+            link.download =
+                "DAWNVision_snapshot_"
+                +
+                Date.now()
+                +
+                ".jpg";
+
+
+            document.body.appendChild(
+                link
+            );
+
+
+            link.click();
+
+
+            document.body.removeChild(
+                link
+            );
+
+}
+
+
+/* =========================================================
+           DAWN DATASET STATUS
+========================================================= */
+
+async function updateDawnStatus() {
+
+
+            try {
+
+
+                const response =
+                    await fetch(
+                        "/api/dawn"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                /* ==============================================
+                   COUNTERS
+                ============================================== */
+
+                document.getElementById(
+                    "imagesProcessed"
+                ).textContent =
+                    data.images_processed || 0;
+
+
+                document.getElementById(
+                    "totalImages"
+                ).textContent =
+                    data.total_images || 0;
+
+
+                document.getElementById(
+                    "totalObjects"
+                ).textContent =
+                    data.total_objects || 0;
+
+
+                /* ==============================================
+                   MODEL NAME
+                ============================================== */
+
+                if (data.model) {
+
+
+                    document.getElementById(
+                        "modelName"
+                    ).textContent =
+                        data.model;
+
+
+                    document.getElementById(
+                        "datasetModel"
+                    ).textContent =
+                        data.model;
+
+                }
+
+
+                /* ==============================================
+                   DATASET STATUS
+                ============================================== */
+
+                const status =
+                    document.getElementById(
+                        "datasetStatus"
+                    );
+
+
+                if (data.running) {
+
+
+                    status.innerHTML =
+
+                        `<span class="loader"></span>
+                         DAWN detection running...
+                         ${data.images_processed || 0}
+                         /
+                         ${data.total_images || "?"}
+                         images`;
+
+
+                    status.className =
+                        "running";
+
+                }
+
+                else if (
+                    data.complete &&
+                    data.success
+                ) {
+
+
+                    status.textContent =
+                        "✅ DAWN dataset detection completed";
+
+
+                    status.className =
+                        "complete";
+
+                }
+
+                else if (data.error) {
+
+
+                    status.textContent =
+                        "❌ "
+                        +
+                        data.error;
+
+
+                    status.className =
+                        "error";
+
+                }
+
+
+                /* ==============================================
+                   MODEL STATUS
+                ============================================== */
+
+                const modelStatus =
+                    document.getElementById(
+                        "modelStatus"
+                    );
+
+
+                const systemStatus =
+                    document.getElementById(
+                        "systemStatus"
+                    );
+
+
+                if (data.error) {
+
+
+                    modelStatus.textContent =
+                        "❌ Error";
+
+
+                    systemStatus.textContent =
+                        "🔴 "
+                        +
+                        data.error;
+
+                }
+
+                else if (data.model) {
+
+
+                    modelStatus.textContent =
+                        "✅ Ready";
+
+
+                    systemStatus.textContent =
+                        "🟢 DAWN YOLO model ready";
+
+                }
+
+
+                /* ==============================================
+                   RESULTS
+                ============================================== */
+
+                if (data.results) {
+
+                    displayDawnResults(
+                        data.results
+                    );
+
+                }
+
+
+            }
+
+            catch (error) {
+
+
+                console.error(
+                    "DAWN status error:",
+                    error
+                );
+
+
+            }
+
+}
+
+
+/* =========================================================
+           DISPLAY DAWN RESULTS
+========================================================= */
+
+function displayDawnResults(
+            results
+) {
+
+
+            const container =
+                document.getElementById(
+                    "results"
+                );
+
+
+            if (
+                !results ||
+                results.length === 0
+            ) {
+
+
+                if (
+                    container.children.length === 0
+                ) {
+
+                    container.innerHTML =
+
+                        `<div class="status">
+                            <span class="loader"></span>
+                            Waiting for DAWN detection results...
+                        </div>`;
+
+                }
+
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                "";
+
+
+            results.forEach(
+                item => {
+
+
+                    const div =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    div.className =
+                        "result";
+
+
+                    let objectsHTML =
+                        "";
+
+
+                    if (
+                        item.objects &&
+                        Object.keys(
+                            item.objects
+                        ).length > 0
+                    ) {
+
+
+                        Object.entries(
+                            item.objects
+                        ).forEach(
+                            ([name, count]) => {
+
+
+                                objectsHTML +=
+
+                                    `<div class="object">
+
+                                        <strong>
+                                            ${escapeHTML(name)}
+                                        </strong>
+
+                                        :
+                                        ${count}
+
+                                    </div>`;
+
+                            }
+                        );
+
+
+                    }
+
+                    else {
+
+
+                        objectsHTML =
+
+                            `<div class="object">
+                                No objects detected.
+                            </div>`;
+
+                    }
+
+
+                    div.innerHTML =
+
+
+                        `<h3>
+                            ${escapeHTML(
+                                item.image || ""
+                            )}
+                        </h3>
+
+
+                        ${
+                            item.result_image
+                            ?
+                            `<img
+                                src="${item.result_image}"
+                                alt="DAWN Detection Result">`
+                            :
+                            ""
+                        }
+
+
+                        <p>
+
+                            <strong>
+                                Objects Detected:
+                            </strong>
+
+                            ${item.total_objects || 0}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Average Confidence:
+                            </strong>
+
+                            ${item.confidence || 0}%
+
+                        </p>
+
+
+                        ${objectsHTML}
+
+
+                        ${
+                            item.error
+                            ?
+                            `<p class="error">
+                                ❌ ${escapeHTML(item.error)}
+                            </p>`
+                            :
+                            ""
+                        }`;
+
+
+                    container.appendChild(
+                        div
+                    );
+
+
+                }
+            );
+
+}
+
+
+/* =========================================================
+           RUN DAWN AGAIN
+========================================================= */
+
+runDawnButton.addEventListener(
+            "click",
+            runDawnDetection
+);
+
+
+async function runDawnDetection() {
+
+
+            runDawnButton.disabled =
+                true;
+
+
+            runDawnButton.textContent =
+                "⏳ Starting DAWN Detection...";
+
+
+            try {
+
+
+                const response =
+                    await fetch(
+                        "/run_dawn"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok || !data.success) {
+
+
+                    throw new Error(
+
+                        data.error ||
+                        "Could not start DAWN detection."
+
+                    );
+
+                }
+
+
+                runDawnButton.textContent =
+                    "🔄 DAWN Detection Running...";
+
+
+                updateDawnStatus();
+
+
+            }
+
+            catch (error) {
+
+
+                alert(
+                    error.message
+                );
+
+
+                runDawnButton.disabled =
+                    false;
+
+
+                runDawnButton.textContent =
+                    "🔄 Run DAWN Detection Again";
+
+            }
+
+}
+
+
+/* =========================================================
+           MODEL CLASSES
+========================================================= */
+
+async function loadModelClasses() {
+
+
+            const container =
+                document.getElementById(
+                    "modelClasses"
+                );
+
+
+            try {
+
+
+                const response =
+                    await fetch(
+                        "/api/model_status"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    data.classes &&
+                    data.classes.length > 0
+                ) {
+
+
+                    container.innerHTML =
+                        "";
+
+
+                    data.classes.forEach(
+                        (name, index) => {
+
+
+                            const tag =
+                                document.createElement(
+                                    "div"
+                                );
+
+
+                            tag.className =
+                                "class-tag";
+
+
+                            tag.textContent =
+                                index
+                                +
+                                " : "
+                                +
+                                name;
+
+
+                            container.appendChild(
+                                tag
+                            );
+
+
+                        }
+                    );
+
+
+                }
+
+                else {
+
+
+                    container.textContent =
+                        "Model classes not available yet.";
+
+                }
+
+
+            }
+
+            catch (error) {
+
+
+                container.textContent =
+                    "Could not load model classes.";
+
+                console.error(
+                    "Model class error:",
+                    error
+                );
+
+            }
+
+}
+
+
+/* =========================================================
+           ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+            value
+) {
+
+
+            return String(value)
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+}
+
+
+/* =========================================================
+           START DAWN REFRESH
+========================================================= */
+
+function startDawnRefresh() {
+
+
+            updateDawnStatus();
+
+
+            loadModelClasses();
+
+
+            dawnRefreshTimer =
+                setInterval(
+
+                    updateDawnStatus,
+
+                    1000
+
+                );
+
+}
+
+
+/* =========================================================
+           PAGE LOAD
+========================================================= */
+
+window.addEventListener(
+            "load",
+            function() {
+
+                startDawnRefresh();
+
+            }
+);
+
+
+/* =========================================================
+           CLEANUP
+========================================================= */
+
+window.addEventListener(
+            "beforeunload",
+            function() {
+
+                stopCamera();
+
+
+                if (dawnRefreshTimer) {
+
+                    clearInterval(
+                        dawnRefreshTimer
+                    );
+
+                }
+
+            }
+);
+
+
+    </script>
+
+
+</body>
+
+</html>
